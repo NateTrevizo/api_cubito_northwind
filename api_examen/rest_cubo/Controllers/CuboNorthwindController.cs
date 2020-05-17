@@ -92,8 +92,6 @@ namespace rest_cubo.Controllers
         [Route("AnosVentas")]
         public HttpResponseMessage AnosVentas()
         {
-            string dimension = "[Dim Tiempo].[Dim Tiempo Año].Children";
-
             string COLUMNS = @"
                 NON EMPTY
                 {
@@ -114,7 +112,6 @@ namespace rest_cubo.Controllers
 
             List<string> anos = new List<string>();
             List<decimal> ventas = new List<decimal>();
-            List<dynamic> lstTabla = new List<dynamic>();
 
             dynamic result = new
             {
@@ -127,7 +124,6 @@ namespace rest_cubo.Controllers
                 cnn.Open();
                 using (AdomdCommand cmd = new AdomdCommand(MDX_QUERY, cnn))
                 {
-                    cmd.Parameters.Add("Dimension", dimension);
                     using (AdomdDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
                     {
                         while (dr.Read())
@@ -142,5 +138,121 @@ namespace rest_cubo.Controllers
 
             return Request.CreateResponse(HttpStatusCode.OK, (object)result);
         }
+
+        [HttpGet]
+        [Route("NombreDim/{dim}")]
+        public HttpResponseMessage NombreDim(string dim)
+        {
+            string dimension = "";
+            switch (dim)
+            {
+                case "Cliente":
+                    dimension = "[Dim Cliente].[Dim Cliente Nombre].Children";
+                    break;
+                case "Producto":
+                    dimension = "[Dim Producto].[Dim Producto Nombre].Children";
+                    break;
+                case "Empleado":
+                    dimension = "[Dim Empleado].[Dim Empleado Nombre].Children";
+                    break;
+                default:
+                    dimension = "[Dim Cliente].[Dim Cliente Nombre].Children";
+                    break;
+
+            }
+
+
+            string COLUMNS = @"
+                NON EMPTY
+                {
+                    [Measures].[Fact Ventas Netas]
+                }
+                ON COLUMNS,    
+            ";
+
+            string CUBO_NAME = "[DWHNorthwind]";
+            string MDX_QUERY = @"SELECT " + COLUMNS + @" NON EMPTY  { " + dimension + "  }ON ROWS FROM " + CUBO_NAME;
+            Debug.Write(MDX_QUERY);
+
+            List<string> meses = new List<string>();
+            List<decimal> ventas = new List<decimal>();
+
+            dynamic result = new
+            {
+                datoDimension = meses,
+                datosVenta = ventas
+            };
+
+            using (AdomdConnection cnn = new AdomdConnection(ConfigurationManager.ConnectionStrings["CuboNorthwind"].ConnectionString))
+            {
+                cnn.Open();
+                using (AdomdCommand cmd = new AdomdCommand(MDX_QUERY, cnn))
+                {
+                    using (AdomdDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
+                    {
+                        while (dr.Read())
+                        {
+                            meses.Add(dr.GetString(0));
+                            ventas.Add(Math.Round(dr.GetDecimal(1)));
+                        }
+                        dr.Close();
+                    }
+                }
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, (object)result);
+        }
+
+        [HttpGet]
+        [Route("MesesVentas")]
+        public HttpResponseMessage MesesVentas()
+        {
+            string COLUMNS = @"
+                NON EMPTY
+                {
+                    [Measures].[Fact Ventas Netas]
+                }
+                ON COLUMNS,    
+            ";
+            string ROWS = @"
+                NON EMPTY
+                {
+                    [Dim Tiempo].[Dim Tiempo Mes].Children
+                }
+                ON ROWS
+            ";
+            string CUBO_NAME = "[DWHNorthwind]";
+            string MDX_QUERY = @"SELECT " + COLUMNS + ROWS + " FROM " + CUBO_NAME;
+            Debug.Write(MDX_QUERY);
+
+            List<string> meses = new List<string>();
+            List<decimal> ventas = new List<decimal>();
+
+            dynamic result = new
+            {
+                datoDimension = meses,
+                datosVenta = ventas
+            };
+
+            using (AdomdConnection cnn = new AdomdConnection(ConfigurationManager.ConnectionStrings["CuboNorthwind"].ConnectionString))
+            {
+                cnn.Open();
+                using (AdomdCommand cmd = new AdomdCommand(MDX_QUERY, cnn))
+                {
+                    using (AdomdDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
+                    {
+                        while (dr.Read())
+                        {
+                            meses.Add(dr.GetString(0));
+                            ventas.Add(Math.Round(dr.GetDecimal(1)));
+                        }
+                        dr.Close();
+                    }
+                }
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, (object)result);
+        }
+
     }
 }
