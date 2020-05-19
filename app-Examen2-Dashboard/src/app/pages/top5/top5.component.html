@@ -1,0 +1,48 @@
+<ng-select class="m-4"
+[items]="defaultBindingsList"
+(change) = "onChangedDimension($event)"
+[clearable]="false"
+           [(ngModel)]="selectedDimension">
+</ng-select>
+
+<ng-select class="m-4"
+id="lbl1"
+    [items]="cliente$ | async"
+    [multiple]="true"
+    [closeOnSelect]="true"
+    [searchable]="false"
+    bindLabel="name"
+    [placeholder]="selectDimension"
+    (change) = "onChangedItemDimension($event)"
+    [(ngModel)]="selectedItemDim">
+</ng-select>
+
+<ng-select class="m-4"
+    [items]="anio$ | async"
+    [multiple]="true"
+    [closeOnSelect]="true"
+    [searchable]="false"
+    bindLabel="name"
+    (change) = "onChangedItemDimension($event)"
+    placeholder="Selecciona multiples anios"
+    [(ngModel)]="selectedAnio">
+</ng-select>
+
+<ng-select class="m-4"
+id="lbl1"
+    [items]="mes$ | async"
+    [multiple]="true"
+    [closeOnSelect]="true"
+    [searchable]="false"
+    bindLabel="name"
+    (change) = "onChangedItemDimension($event)"
+    placeholder="Selecciona multiples meses"
+    [(ngModel)]="selectedMes">
+</ng-select>
+
+
+<app-pie-chart titulo="Ventas de las dimensiones por Año y Meses"  
+[pieChartLabels]="dataDimension"
+[pieChartData]="dataValues" >
+   
+</app-pie-chart>

@@ -1,0 +1,18 @@
+<h3 class="text-center">{{titulo}}</h3>
+
+<div class="m-8" layout="row" layout-align="center center">
+    <div>
+      <div style="height:900px;width:900px;" >
+        <canvas baseChart 
+       
+          [datasets]="barChartData"
+          [labels]="barChartLabels"
+          [options]="barChartOptions"
+          [plugins]="barChartPlugins"
+          [legend]="barChartLegend"
+          [chartType]="barChartType">
+        </canvas>
+      </div>
+      <button mat-button mat-raised-button color="primary" >Update</button>
+    </div>
+  </div>
